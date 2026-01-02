@@ -12,7 +12,7 @@ import { toast } from 'sonner';
 
 // Query keys
 export const accountKeys = {
-  all: ['accounts'] as const,
+  all: ['account'] as const,
   lists: () => [...accountKeys.all, 'list'] as const,
   list: (filters?: any) => [...accountKeys.lists(), filters] as const,
   details: () => [...accountKeys.all, 'detail'] as const,

@@ -8,9 +8,13 @@ import { Wallet, TrendingUp, TrendingDown, Activity } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { useAccounts } from '@/hook/useAccount';
+import { useJournalReport } from '@/hook/useReport';
 
 export default function DashboardPage() {
   const { data: accounts, isLoading } = useAccounts();
+  console.log(accounts);
+  const {data} = useJournalReport();
+  console.log(data);
 
   // Calculate summary stats
   const stats = {
