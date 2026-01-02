@@ -3,14 +3,23 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
-import { Wallet, TrendingUp, TrendingDown, Activity } from 'lucide-react';
+import { Wallet, TrendingUp, TrendingDown, Activity, Plus } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { useAccounts } from '@/hook/useAccount';
 import { useJournalReport } from '@/hook/useReport';
+import { useState } from 'react';
+import { TransactionForm } from '@/components/features/transactions/TransactionsForm';
 
 export default function DashboardPage() {
+  const [isFormOpen, setIsFormOpen] = useState(false);
   const { data: accounts, isLoading } = useAccounts();
   console.log(accounts);
   const {data} = useJournalReport();
@@ -36,9 +45,21 @@ export default function DashboardPage() {
             Overview of your accounting system
           </p>
         </div>
-        <Link href="/transactions/new">
-          <Button>New Transaction</Button>
-        </Link>
+         {/* Button to open dialog */}
+        <Button onClick={() => setIsFormOpen(true)}>
+          <Plus className="w-4 h-4 mr-2" />
+          New Transaction
+        </Button>
+
+        {/* Dialog */}
+        <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Create New Transaction</DialogTitle>
+            </DialogHeader>
+            <TransactionForm onSuccess={() => setIsFormOpen(false)} />
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Stats Grid */}

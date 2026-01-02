@@ -1,11 +1,23 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
+import { useState } from 'react';
 import { Plus } from 'lucide-react';
+
 import { TransactionList } from '@/components/features/transactions/TransactionList';
-import Link from 'next/link';
+import { TransactionForm } from '@/components/features/transactions/TransactionsForm';
+
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 
 export default function TransactionsPage() {
+  const [isFormOpen, setIsFormOpen] = useState(false);
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -18,12 +30,22 @@ export default function TransactionsPage() {
             View and manage all transactions
           </p>
         </div>
-        <Link href="/transactions/new">
-          <Button>
-            <Plus className="w-4 h-4 mr-2" />
-            New Transaction
-          </Button>
-        </Link>
+
+        {/* Button to open dialog */}
+        <Button onClick={() => setIsFormOpen(true)}>
+          <Plus className="w-4 h-4 mr-2" />
+          New Transaction
+        </Button>
+
+        {/* Dialog */}
+        <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Create New Transaction</DialogTitle>
+            </DialogHeader>
+            <TransactionForm onSuccess={() => setIsFormOpen(false)} />
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Transaction List */}
