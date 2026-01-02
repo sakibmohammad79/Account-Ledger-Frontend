@@ -367,4 +367,4 @@ Add to Vercel:
 - Dark mode preference is saved to localStorage
 - React Query caches data automatically
 
-Happy coding! 🚀
+Built with ❤️ for FytoByte Technical Assessment
