@@ -34,9 +34,9 @@ const navigation = [
     icon: FileText,
     children: [
       { name: 'Journal', href: '/reports/journal' },
-      { name: 'Balance Sheet', href: '/reports/balance-sheet' },
       { name: 'Income Statement', href: '/reports/income-statement' },
       { name: 'Trial Balance', href: '/reports/trial-balance' },
+      { name: 'Balance Sheet', href: '/reports/balance-sheet' },
     ],
   },
 ];

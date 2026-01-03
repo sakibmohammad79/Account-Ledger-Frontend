@@ -1,10 +1,15 @@
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
-import { BarChart3, TrendingUp, Scale, BookOpen } from 'lucide-react';
+import { BarChart3, TrendingUp, Scale, BookOpen, Activity } from 'lucide-react';
 
-const reports = [
+import { formatCurrency } from '@/lib/utils';
+import { useBalanceSheet, useIncomeStatement, useTrialBalance } from '@/hook/useReport';
+import { useTransactions } from '@/hook/useTransaction';
+
+const reportDefinitions = [
   {
     title: 'Journal Report',
     description: 'Chronological list of all transactions with details',
@@ -40,6 +45,17 @@ const reports = [
 ];
 
 export default function ReportsPage() {
+  // Fetch actual data
+  const { data: balanceSheet, isLoading: loadingBalance } = useBalanceSheet();
+  const { data: incomeStatement, isLoading: loadingIncome } = useIncomeStatement();
+  const { data: trialBalance, isLoading: loadingTrial } = useTrialBalance();
+  const { data: transactionsData, isLoading: loadingTransactions } = useTransactions({ 
+    page: 1, 
+    limit: 10 
+  });
+
+  const isLoadingData = loadingBalance || loadingIncome || loadingTrial || loadingTransactions;
+  const transactionMeta = transactionsData?.meta || [];
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -52,9 +68,95 @@ export default function ReportsPage() {
         </p>
       </div>
 
+      {/* Quick Stats */}
+      {isLoadingData ? (
+        <div className="grid gap-4 md:grid-cols-4">
+          {[...Array(4)].map((_, i) => (
+            <Card key={i}>
+              <CardHeader className="pb-3">
+                <Skeleton className="h-4 w-24" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-8 w-32" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-4">
+          {/* Total Assets */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+              <CardTitle className="text-sm font-medium">Total Assets</CardTitle>
+              <Scale className="w-4 h-4 text-green-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {balanceSheet ? formatCurrency(balanceSheet.assets.total) : '-'}
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Current balance
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Net Income */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+              <CardTitle className="text-sm font-medium">Net Income</CardTitle>
+              <TrendingUp className="w-4 h-4 text-purple-600" />
+            </CardHeader>
+            <CardContent>
+              <div className={`text-2xl font-bold ${
+                incomeStatement?.isProfitable ? 'text-green-600' : 'text-red-600'
+              }`}>
+                {incomeStatement ? formatCurrency(Math.abs(incomeStatement.netIncome)) : '-'}
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                {incomeStatement?.isProfitable ? 'Profit' : 'Loss'}
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Total Transactions */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+              <CardTitle className="text-sm font-medium">Total Transactions</CardTitle>
+              <Activity className="w-4 h-4 text-blue-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {transactionMeta?.total || 0}
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                All time
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Balance Status */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+              <CardTitle className="text-sm font-medium">Trial Balance</CardTitle>
+              <BarChart3 className="w-4 h-4 text-orange-600" />
+            </CardHeader>
+            <CardContent>
+              <div className={`text-2xl font-bold ${
+                trialBalance?.isBalanced ? 'text-green-600' : 'text-red-600'
+              }`}>
+                {trialBalance?.isBalanced ? '✓ Balanced' : '✗ Not Balanced'}
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Current status
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
       {/* Report Cards Grid */}
       <div className="grid gap-6 md:grid-cols-2">
-        {reports.map((report) => {
+        {reportDefinitions.map((report) => {
           const Icon = report.icon;
           return (
             <Link key={report.href} href={report.href}>
@@ -79,6 +181,63 @@ export default function ReportsPage() {
         })}
       </div>
 
+      {/* Financial Summary */}
+      {!isLoadingData && balanceSheet && incomeStatement && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Financial Summary</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-3">
+              <div>
+                <h3 className="font-semibold mb-2 text-green-600">Assets</h3>
+                <p className="text-2xl font-bold">
+                  {formatCurrency(balanceSheet.assets.total)}
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  {balanceSheet.assets.accounts.length} accounts
+                </p>
+              </div>
+              <div>
+                <h3 className="font-semibold mb-2 text-red-600">Liabilities</h3>
+                <p className="text-2xl font-bold">
+                  {formatCurrency(balanceSheet.liabilities.total)}
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  {balanceSheet.liabilities.accounts.length} accounts
+                </p>
+              </div>
+              <div>
+                <h3 className="font-semibold mb-2 text-blue-600">Equity</h3>
+                <p className="text-2xl font-bold">
+                  {formatCurrency(balanceSheet.equity.total)}
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  {balanceSheet.equity.accounts.length} accounts
+                </p>
+              </div>
+            </div>
+
+            <div className="pt-4 border-t">
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <h3 className="font-semibold mb-2 text-purple-600">Revenue</h3>
+                  <p className="text-2xl font-bold">
+                    {formatCurrency(incomeStatement.revenue.total)}
+                  </p>
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-2 text-orange-600">Expenses</h3>
+                  <p className="text-2xl font-bold">
+                    {formatCurrency(incomeStatement.expenses.total)}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Info Section */}
       <Card>
         <CardHeader>
@@ -95,7 +254,7 @@ export default function ReportsPage() {
           <div>
             <h3 className="font-semibold mb-2">Balance Sheet</h3>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Displays your company&rsquo;s financial position at a specific point in
+              Displays your company&apos;s financial position at a specific point in
               time. Assets must equal Liabilities plus Equity.
             </p>
           </div>

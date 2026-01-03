@@ -3,8 +3,6 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
-
-
 import {
   Dialog,
   DialogContent,
@@ -12,6 +10,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { AccountForm } from '@/components/features/accounts/AccountForm';
+import { AccountList } from '@/components/features/accounts/AccountList';
 
 export default function AccountsPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -35,7 +34,7 @@ export default function AccountsPage() {
       </div>
 
       {/* Account List */}
-      {/* <AccountList /> */}
+      <AccountList />
 
       {/* Create Account Dialog */}
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>

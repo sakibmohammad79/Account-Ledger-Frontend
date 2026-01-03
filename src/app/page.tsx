@@ -19,8 +19,10 @@ export default function DashboardPage() {
     page: 1, 
     limit: 5 
   });
+ 
 
   const recentTransactions = transactionsData?.data || [];
+  const transactionMeta = transactionsData?.meta || [];
 
   // Calculate summary stats
   const stats = {
@@ -42,9 +44,7 @@ export default function DashboardPage() {
             Overview of your accounting system
           </p>
         </div>
-        <Link href="/transactions/new">
-          <Button>New Transaction</Button>
-        </Link>
+        
       </div>
 
       {/* Stats Grid */}
@@ -103,15 +103,15 @@ export default function DashboardPage() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card className="hover:shadow-md transition-shadow cursor-pointer">
-          <Link href="/transactions/new">
+          <Link href="/reports/journal">
             <CardHeader>
-              <CardTitle>Create Transaction</CardTitle>
+              <CardTitle>Journal Report</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                Record a new accounting transaction
+                View Chronological list of all transactions
               </p>
             </CardContent>
           </Link>
@@ -138,6 +138,19 @@ export default function DashboardPage() {
             <CardContent>
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 View profit and loss report
+              </p>
+            </CardContent>
+          </Link>
+        </Card>
+
+        <Card className="hover:shadow-md transition-shadow cursor-pointer">
+          <Link href="/reports/trial-balance">
+            <CardHeader>
+              <CardTitle>Trial Balance</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Verify accounting equation
               </p>
             </CardContent>
           </Link>
@@ -244,7 +257,7 @@ export default function DashboardPage() {
                   Total Transactions
                 </span>
                 <span className="font-semibold">
-                  {transactionsData?.pagination?.total || 0}
+                  {transactionMeta?.total || 0}
                 </span>
               </div>
               <div className="flex justify-between">
