@@ -1,29 +1,25 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
-import { Wallet, TrendingUp, TrendingDown, Activity, Plus } from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-
+import { Wallet, TrendingUp, TrendingDown, Activity, ArrowRight } from 'lucide-react';
+import { formatCurrency, formatDate, getTransactionTypeColor, getTransactionTypeLabel } from '@/lib/utils';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useAccounts } from '@/hook/useAccount';
-import { useJournalReport } from '@/hook/useReport';
-import { useState } from 'react';
-import { TransactionForm } from '@/components/features/transactions/TransactionsForm';
+import { useTransactions } from '@/hook/useTransaction';
 
 export default function DashboardPage() {
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const { data: accounts, isLoading } = useAccounts();
-  console.log(accounts);
-  const {data} = useJournalReport();
-  console.log(data);
+  const { data: accounts, isLoading: accountsLoading } = useAccounts();
+  const { data: transactionsData, isLoading: transactionsLoading } = useTransactions({ 
+    page: 1, 
+    limit: 5 
+  });
+
+  const recentTransactions = transactionsData?.data || [];
 
   // Calculate summary stats
   const stats = {
@@ -45,21 +41,9 @@ export default function DashboardPage() {
             Overview of your accounting system
           </p>
         </div>
-         {/* Button to open dialog */}
-        <Button onClick={() => setIsFormOpen(true)}>
-          <Plus className="w-4 h-4 mr-2" />
-          New Transaction
-        </Button>
-
-        {/* Dialog */}
-        <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Create New Transaction</DialogTitle>
-            </DialogHeader>
-            <TransactionForm onSuccess={() => setIsFormOpen(false)} />
-          </DialogContent>
-        </Dialog>
+        <Link href="/transactions/new">
+          <Button>New Transaction</Button>
+        </Link>
       </div>
 
       {/* Stats Grid */}
@@ -70,7 +54,7 @@ export default function DashboardPage() {
             <Wallet className="w-4 h-4 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats?.totalAssets}</div>
+            <div className="text-2xl font-bold">{stats.totalAssets}</div>
             <p className="text-xs text-gray-500 dark:text-gray-400">
               Active accounts
             </p>
@@ -83,7 +67,7 @@ export default function DashboardPage() {
             <TrendingDown className="w-4 h-4 text-red-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats?.totalLiabilities}</div>
+            <div className="text-2xl font-bold">{stats.totalLiabilities}</div>
             <p className="text-xs text-gray-500 dark:text-gray-400">
               Active accounts
             </p>
@@ -96,7 +80,7 @@ export default function DashboardPage() {
             <TrendingUp className="w-4 h-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats?.totalRevenue}</div>
+            <div className="text-2xl font-bold">{stats.totalRevenue}</div>
             <p className="text-xs text-gray-500 dark:text-gray-400">
               Active accounts
             </p>
@@ -109,7 +93,7 @@ export default function DashboardPage() {
             <Activity className="w-4 h-4 text-orange-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats?.totalExpenses}</div>
+            <div className="text-2xl font-bold">{stats.totalExpenses}</div>
             <p className="text-xs text-gray-500 dark:text-gray-400">
               Active accounts
             </p>
@@ -162,14 +146,143 @@ export default function DashboardPage() {
       {/* Recent Activity */}
       <Card>
         <CardHeader>
-          <CardTitle>Recent Activity</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle>Recent Transactions</CardTitle>
+            <Link href="/transactions">
+              <Button variant="ghost" size="sm">
+                View All
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            </Link>
+          </div>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            No recent transactions yet. Create your first transaction to get started.
-          </p>
+          {transactionsLoading ? (
+            <div className="space-y-3">
+              {[...Array(3)].map((_, i) => (
+                <Skeleton key={i} className="h-20 w-full" />
+              ))}
+            </div>
+          ) : recentTransactions.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                No recent transactions yet.
+              </p>
+              <Link href="/transactions/new">
+                <Button className="mt-4" size="sm">
+                  Create Your First Transaction
+                </Button>
+              </Link>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {recentTransactions.map((transaction: any) => {
+                const totalAmount = transaction.entries.reduce(
+                  (sum: number, e: any) => sum + e.debit,
+                  0
+                );
+                return (
+                  <Link
+                    key={transaction.id}
+                    href={`/transactions/${transaction.id}`}
+                  >
+                    <div className="flex items-center justify-between p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-mono text-sm font-semibold">
+                            {transaction.transactionNo}
+                          </span>
+                          <Badge
+                            className={getTransactionTypeColor(
+                              transaction.type
+                            )}
+                          >
+                            {getTransactionTypeLabel(transaction.type)}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                          {transaction.description}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                          {formatDate(transaction.date)}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold text-lg">
+                          {formatCurrency(totalAmount)}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          {transaction.entries.length} entries
+                        </p>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
         </CardContent>
       </Card>
+
+      {/* Quick Stats Summary */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">System Status</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-500 dark:text-gray-400">
+                  Total Accounts
+                </span>
+                <span className="font-semibold">{accounts?.length || 0}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500 dark:text-gray-400">
+                  Total Transactions
+                </span>
+                <span className="font-semibold">
+                  {transactionsData?.pagination?.total || 0}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500 dark:text-gray-400">
+                  Active Accounts
+                </span>
+                <span className="font-semibold">
+                  {accounts?.filter((a) => a.isActive).length || 0}
+                </span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Quick Links</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <Link href="/accounts">
+                <Button variant="ghost" className="w-full justify-start" size="sm">
+                  Manage Accounts
+                </Button>
+              </Link>
+              <Link href="/reports/journal">
+                <Button variant="ghost" className="w-full justify-start" size="sm">
+                  Journal Report
+                </Button>
+              </Link>
+              <Link href="/reports/trial-balance">
+                <Button variant="ghost" className="w-full justify-start" size="sm">
+                  Trial Balance
+                </Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
