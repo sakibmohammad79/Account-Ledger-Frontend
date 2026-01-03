@@ -4,13 +4,22 @@ import { Moon, Sun, Menu } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
 
-export function Header() {
+interface HeaderProps {
+  onMobileMenuClick?: () => void;
+}
+
+export function Header({ onMobileMenuClick }: HeaderProps) {
   const { theme, setTheme } = useTheme();
 
   return (
     <header className="sticky top-0 z-10 flex items-center justify-between h-16 px-4 bg-white border-b border-gray-200 md:px-6 lg:px-8 dark:bg-gray-800 dark:border-gray-700">
       {/* Mobile menu button */}
-      <Button variant="ghost" size="icon" className="md:hidden">
+      <Button
+        variant="ghost"
+        size="icon"
+        className="md:hidden"
+        onClick={onMobileMenuClick}
+      >
         <Menu className="w-5 h-5" />
       </Button>
 
