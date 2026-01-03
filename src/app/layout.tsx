@@ -7,8 +7,14 @@ import { Toaster } from 'sonner';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Header } from '@/components/layout/Header';
 import { useState } from 'react';
+import { Metadata } from 'next';
 
 const inter = Inter({ subsets: ['latin'] });
+
+export const metadata: Metadata = {
+  title: 'Accounting Ledger - Double Entry Bookkeeping',
+  description: 'Professional accounting and bookkeeping system',
+};
 
 export default function RootLayout({
   children,
