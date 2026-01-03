@@ -44,8 +44,7 @@ const  JournalReportPage = () => {
   const transactions = journal?.data || [];
   const pagination = journal?.pagination;
 
-  console.log(transactions, "journal");
-  console.log(pagination, "journal");
+
   
   return (
     <div className="space-y-6">

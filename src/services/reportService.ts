@@ -7,7 +7,6 @@ import {
   PaginatedResponse,
   ApiResponse,
   ReportFilters,
-  Transaction,
 } from '@/types';
 
 export const reportService = {
