@@ -4,7 +4,7 @@ import { ReportFilters } from '@/types';
 
 // Query keys
 export const reportKeys = {
-  all: ['reports'] as const,
+  all: ['report'] as const,
   journal: (filters?: ReportFilters & { page?: number; limit?: number }) =>
     [...reportKeys.all, 'journal', filters] as const,
   balanceSheet: (asOfDate?: string) =>
@@ -24,6 +24,7 @@ export const useJournalReport = (
   return useQuery({
     queryKey: reportKeys.journal(filters),
     queryFn: () => reportService.getJournal(filters),
+    select: (response) => response.data,
   });
 };
 

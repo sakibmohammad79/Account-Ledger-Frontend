@@ -14,7 +14,7 @@ export const reportService = {
   // Get Journal Report
   getJournal: async (
     filters?: ReportFilters & { page?: number; limit?: number }
-  ): Promise<PaginatedResponse<Transaction>> => {
+  ): Promise<PaginatedResponse<any>> => {
     return apiClient.get('/report/journal', { params: filters });
   },
 

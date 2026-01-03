@@ -49,7 +49,7 @@ export const transactionService = {
    * Update existing transaction
    */
   update: async (id: string, data: UpdateTransactionInput) => {
-    const response = await api.put(`/transaction/${id}`, data);
+    const response = await api.patch(`/transaction/${id}`, data);
     return response.data;
   },
 

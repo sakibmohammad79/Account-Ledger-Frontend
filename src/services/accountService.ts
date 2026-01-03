@@ -34,7 +34,7 @@ export const accountService = {
     id: string,
     data: UpdateAccountInput
   ): Promise<ApiResponse<Account>> => {
-    return apiClient.put(`/account/${id}`, data);
+    return apiClient.patch(`/account/${id}`, data);
   },
 
   // Delete account
