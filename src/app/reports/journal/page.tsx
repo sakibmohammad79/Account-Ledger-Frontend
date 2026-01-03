@@ -44,6 +44,9 @@ const  JournalReportPage = () => {
   const transactions = journal?.data || [];
   const pagination = journal?.pagination;
 
+  console.log(transactions, "journal");
+  console.log(pagination, "journal");
+  
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -127,7 +130,7 @@ const  JournalReportPage = () => {
                 0
               );
               const totalCredit = transaction.entries.reduce(
-                (sum, e: any) => sum + e.credit,
+                (sum: number, e: any) => sum + e.credit,
                 0
               );
 

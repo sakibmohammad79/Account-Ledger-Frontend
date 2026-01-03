@@ -78,6 +78,8 @@ export interface Transaction {
   entries: Entry[];
   createdAt: string;
   updatedAt: string;
+  data: any;
+  pagination: any;
 }
 
 export interface CreateEntryInput {

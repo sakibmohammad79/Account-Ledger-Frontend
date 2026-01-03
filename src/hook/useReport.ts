@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useQuery } from '@tanstack/react-query';
 import { reportService } from '@/services/reportService';
 import { ReportFilters } from '@/types';
@@ -24,7 +25,12 @@ export const useJournalReport = (
   return useQuery({
     queryKey: reportKeys.journal(filters),
     queryFn: () => reportService.getJournal(filters),
-    select: (response) => response.data,
+    select: (response: any) => {
+      return {
+        data: response?.data?.data,          // transactions
+        pagination: response?.data.pagination,
+      };
+    },
   });
 };
 
